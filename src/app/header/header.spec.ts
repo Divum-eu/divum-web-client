@@ -18,7 +18,7 @@ describe('Header', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it('should create header', () => {
     expect(component).toBeTruthy();
   });
 });

@@ -16,7 +16,7 @@ describe('MinecraftServers', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it('should create minecraft-servers', () => {
     expect(component).toBeTruthy();
   });
 });

@@ -16,7 +16,7 @@ describe('Login', () => {
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it('should create login', () => {
     expect(component).toBeTruthy();
   });
 });
