@@ -1,1 +1,64 @@
-<p>login works!</p>
+<div class="flex min-h-screen w-full items-center justify-center p-4">
+  <hlm-card class="w-full max-w-sm">
+  <hlm-card-header>
+    <h3 hlmCardTitle class="text-center text-2xl">Login to Divum</h3>
+    <p hlmCardDescription>Enter your username and password to access your account.</p>
+  </hlm-card-header>
+  <div hlmCardContent>
+    <form [formRoot]="form" id="form-login">
+      <hlm-field-group>
+        <hlm-field>
+          <label hlmFieldLabel for="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            hlmInput
+            placeholder="John Doe"
+            [formField]="form.username"
+          />
+
+          @for (error of form.username().errors(); track error) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        </hlm-field>
+
+        <hlm-field>
+          <label hlmFieldLabel for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            hlmInput
+            placeholder="••••••••"
+            autoComplete="current-password"
+            [formField]="form.password"
+          />
+
+          @for (error of form.password().errors(); track error) {
+            <hlm-field-error [validator]="error.kind">
+              {{ error.message }}
+            </hlm-field-error>
+          }
+        </hlm-field>
+      </hlm-field-group>
+    </form>
+  </div>
+    <hlm-card-footer>
+      <div class="flex flex-row items-center gap-4 w-full">
+
+        <button hlmBtn type="submit" form="form-login" [disabled]="isLoading()">
+          Sign In
+        </button>
+
+        <p class="text-sm text-muted-foreground">
+          Don't have an account?
+          <a routerLink="/register" class="text-foreground font-medium hover:underline ml-1">
+            Sign up
+          </a>
+        </p>
+
+      </div>
+    </hlm-card-footer>
+</hlm-card>
+</div>
