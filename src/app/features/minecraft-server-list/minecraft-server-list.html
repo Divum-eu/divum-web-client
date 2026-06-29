@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold tracking-tight">Your Minecraft Servers</h1>
       <p class="text-muted-foreground">Manage, monitor, and configure your active server instances.</p>
     </div>
-    <create-server-btn />
+    <create-server-btn (onSaved)="loadServers()" />
   </div>
 
   @if (loading()) {
@@ -42,6 +42,9 @@
                   <h3 hlmCardTitle class="truncate">{{ server.configuration.serverName || server.configuration.motd || 'Minecraft Server' }}</h3>
                   <p hlmCardDescription class="truncate">{{ server.configuration.motd && server.configuration.motd !== server.configuration.serverName ? server.configuration.motd : '' }}</p>
                 </div>
+
+                <edit-server-btn [server]="server" (onSaved)="loadServers()" />
+
                 <button
                   hlmBtn
                   size="icon"

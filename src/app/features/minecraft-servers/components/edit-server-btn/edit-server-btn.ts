@@ -1,40 +1,54 @@
 import {
   Component,
   inject,
+  input,
+  OnInit,
   output,
   Signal,
   signal,
   ViewChild,
   WritableSignal,
 } from '@angular/core';
-import { BrnDialogTrigger } from '@spartan-ng/brain/dialog';
-import { form, FormField, FormRoot, max, min, pattern, required, validate } from '@angular/forms/signals';
-import { HlmButton } from '@spartan-ng/helm/button';
-import { HlmDialog, HlmDialogClose, HlmDialogContent, HlmDialogDescription, HlmDialogFooter, HlmDialogHeader,
-  HlmDialogPortal, HlmDialogTitle
+import {
+  HlmDialog,
+  HlmDialogClose,
+  HlmDialogContent,
+  HlmDialogDescription,
+  HlmDialogFooter,
+  HlmDialogHeader,
+  HlmDialogPortal,
+  HlmDialogTitle,
 } from '@spartan-ng/helm/dialog';
-import { HlmField, HlmFieldError, HlmFieldGroup, HlmFieldLabel } from '@spartan-ng/helm/field';
-import { HlmInput } from '@spartan-ng/helm/input';
-import { HlmSlider } from '@spartan-ng/helm/slider';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { MinecraftVersionService } from '../../../../core/services/minecraft-version-service';
 import {
   DEFAULT_SERVER_STATE,
-  MinecraftServerDifficulty,
   MinecraftServerFormState,
   MinecraftServerInstanceConfiguration,
-  MinecraftServerMode,
   MinecraftServersService,
-  MinecraftServerType,
 } from '../../../../core/services/minecraft-servers-service';
-import { Router } from '@angular/router';
+import {
+  form,
+  FormField,
+  FormRoot,
+  max,
+  min,
+  pattern,
+  required,
+  validate,
+} from '@angular/forms/signals';
 import { finalize } from 'rxjs';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HttpErrorResponse } from '@angular/common/http';
-import { lucidePlus } from '@ng-icons/lucide';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideEdit } from '@ng-icons/lucide';
+import { Router } from '@angular/router';
+import { MinecraftVersionService } from '../../../../core/services/minecraft-version-service';
+import { HlmField, HlmFieldError, HlmFieldGroup, HlmFieldLabel } from '@spartan-ng/helm/field';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { BrnDialogTrigger } from '@spartan-ng/brain/dialog';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmSlider } from '@spartan-ng/helm/slider';
 
 @Component({
-  selector: 'create-server-btn',
   imports: [
     HlmButton,
     NgIcon,
@@ -56,30 +70,32 @@ import { lucidePlus } from '@ng-icons/lucide';
     FormField,
     HlmFieldError,
   ],
-  providers: [provideIcons({ lucidePlus })],
-  templateUrl: './create-server-btn.html',
-  styleUrl: './create-server-btn.css',
+  providers: [provideIcons({ lucideEdit })],
+  selector: 'edit-server-btn',
+  styleUrl: './edit-server-btn.css',
+  templateUrl: './edit-server-btn.html',
 })
-export class CreateServerBtn {
-  @ViewChild('createServerDialog', { read: HlmDialog }) public dialog!: HlmDialog;
+export class EditServerBtn implements OnInit {
+  @ViewChild('editServerDialog', { read: HlmDialog }) public dialog!: HlmDialog;
 
+  public server = input.required<any>();
   public onSaved = output<void>();
 
-  private _versionService: MinecraftVersionService = inject(MinecraftVersionService);
   private _minecraftServersService: MinecraftServersService = inject(MinecraftServersService);
+  private _versionService: MinecraftVersionService = inject(MinecraftVersionService);
   private _router: Router = inject(Router);
 
   public availableVersions = signal<string[]>(['LATEST']);
-  private _isLoading: WritableSignal<boolean> = signal<boolean>(false);
 
+  private _isLoading: WritableSignal<boolean> = signal<boolean>(false);
   protected readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
 
-  protected readonly _createMinecraftServerModel = signal<MinecraftServerFormState>({
+  protected readonly _editMinecraftServerModel = signal<MinecraftServerFormState>({
     ...DEFAULT_SERVER_STATE,
   });
 
-  protected readonly createMinecraftServerForm = form(
-    this._createMinecraftServerModel,
+  protected readonly editMinecraftServerForm = form(
+    this._editMinecraftServerModel,
     (schemaPath) => {
       required(schemaPath.memoryLimit, { message: 'Memory limit is required.' });
       min(schemaPath.memoryLimit, 1, { message: 'Minimum RAM is 1 GB.' });
@@ -111,7 +127,7 @@ export class CreateServerBtn {
       submission: {
         action: async () => {
           this._isLoading.set(true);
-          const formState = this._createMinecraftServerModel();
+          const formState = this._editMinecraftServerModel();
 
           const payload: MinecraftServerInstanceConfiguration = {
             ...formState,
@@ -135,30 +151,35 @@ export class CreateServerBtn {
           };
 
           this._minecraftServersService
-            .createMinecraftServer(payload)
+            .updateMinecraftServer(this.server().id, payload)
             .pipe(finalize(() => this._isLoading.set(false)))
             .subscribe({
-              next: (serverId: string) => {
+              next: () => {
                 this.dialog.close();
-                this._createMinecraftServerModel.set({ ...DEFAULT_SERVER_STATE });
                 this.onSaved.emit();
-                toast.success('Minecraft server created!', {
-                  position: 'top-right',
-                });
+                toast.success('Server updated successfully.', { position: 'top-right' });
               },
               error: (err: HttpErrorResponse) => {
-                if (err.status === 401) {
+                if (err.status === 401 || err.status === 400) {
                   toast.error('Login needed', {
-                    description: 'Login to access this functionality',
+                    description: 'Your session has expired. Please log in again.',
                     position: 'top-right',
                   });
                   this._router.navigate(['/login']);
                   return;
                 }
 
-                let errorData = JSON.parse(err.error);
-                toast.error(errorData.title, {
-                  description: errorData.detail,
+                let errorData = err.error;
+                if (typeof errorData === 'string') {
+                  try {
+                    errorData = JSON.parse(errorData);
+                  } catch (e) {
+                    errorData = { title: 'Error', detail: 'An unexpected error occurred.' };
+                  }
+                }
+
+                toast.error(errorData.title || 'Error', {
+                  description: errorData.detail || 'Something went wrong.',
                   position: 'top-right',
                 });
               },
@@ -169,25 +190,37 @@ export class CreateServerBtn {
   );
 
   protected onMemoryLimitChange(newValues: number[]) {
-    this._createMinecraftServerModel.update((model) => ({
+    this._editMinecraftServerModel.update((model) => ({
       ...model,
       memoryLimit: newValues[0],
     }));
   }
 
   protected onCpuCoresLimitChange(newValues: number[]) {
-    this._createMinecraftServerModel.update((model) => ({
+    this._editMinecraftServerModel.update((model) => ({
       ...model,
       cpuCoresLimit: newValues[0],
     }));
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this._versionService.getStableReleases().subscribe({
       next: (versions) => {
         this.availableVersions.set(['LATEST', ...versions]);
       },
       error: (err) => console.error('Failed to fetch Mojang versions:', err),
+    });
+
+    const config = this.server().configuration;
+    this._editMinecraftServerModel.set({
+      ...DEFAULT_SERVER_STATE,
+      ...config,
+
+      memoryLimit: config.memoryLimit ? (config.memoryLimit / 1024) : 2,
+      whitelist: config.whitelist ? config.whitelist.join(', ') : '',
+      ops: config.ops ? config.ops.join(', ') : '',
+      opPermissionLevel: config.opPermissionLevel.toString(),
+      serverAddress: config.serverAddress.replace('.divum.eu', ''),
     });
   }
 }
