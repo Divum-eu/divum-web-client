@@ -1,6 +1,12 @@
-<header class="flex items-center gap-4 bg-primary text-primary-foreground font-normal">
-    <a routerLink="/login" class="font-medium">Login</a>
-    <a routerLink="/register" class="font-medium">Register</a>
-    <a routerLink="/minecraft-servers" class="font-medium">Minecraft Servers</a>
-
+<header class="flex items-center justify-between px-6 py-3 bg-background border-b border-border">
+  <a routerLink="/" class="text-lg font-semibold tracking-tight text-foreground">Divum</a>
+  <nav class="flex items-center gap-1">
+    @if (isAuthenticated()) {
+      <a hlmBtn variant="ghost" routerLink="/minecraft-servers">Minecraft Servers</a>
+      <button hlmBtn variant="ghost" (click)="logout()">Logout</button>
+    } @else {
+      <a hlmBtn variant="ghost" routerLink="/login">Login</a>
+      <a hlmBtn variant="ghost" routerLink="/register">Register</a>
+    }
+  </nav>
 </header>

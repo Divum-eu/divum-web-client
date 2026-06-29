@@ -1,6 +1,201 @@
-<h1 class="text-4xl text-center">All your worlds in one place!</h1>
-<section>
-  <div class="flex align-middle justify-center mt-10">
-    <create-server-btn />
+<div class="p-6 max-w-7xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div class="space-y-1">
+      <h1 class="text-3xl font-bold tracking-tight">{{ config()?.serverName || 'Server Dashboard' }}</h1>
+      <p class="text-muted-foreground text-sm">Instance: <span class="font-mono">{{ serverId }}</span></p>
+      @if (config()?.motd) {
+        <p class="text-muted-foreground/70 text-xs italic">"{{ config()?.motd }}"</p>
+      }
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-3 w-3">
+          @if (status()?.status === 'running') {
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          }
+          <span
+            class="relative inline-flex rounded-full h-3 w-3"
+            [ngClass]="status()?.status === 'running' ? 'bg-emerald-500' : 'bg-red-500'"
+          ></span>
+        </span>
+        <span class="font-medium capitalize text-sm">{{ status()?.status || 'Unknown' }}</span>
+      </div>
+      @if (status()?.status === 'stopped') {
+        <button hlmBtn size="sm" (click)="start()" [disabled]="toggleInProgress()">
+          {{ toggleInProgress() ? 'Starting...' : 'Start' }}
+        </button>
+      }
+      @if (status()?.status === 'running') {
+        <button hlmBtn size="sm" variant="destructive" (click)="stop()" [disabled]="toggleInProgress()">
+          {{ toggleInProgress() ? 'Stopping...' : 'Stop' }}
+        </button>
+      }
+      <hlm-dialog>
+        <button
+          hlmBtn
+          size="icon"
+          variant="ghost"
+          class="text-destructive/60 hover:text-destructive ml-2"
+          brnDialogTrigger
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+        <hlm-dialog-content *hlmDialogPortal="let ctx" class="sm:max-w-md">
+          <hlm-dialog-header>
+            <h3 hlmDialogTitle>Delete Server</h3>
+            <p hlmDialogDescription>
+              Are you sure you want to delete <strong>"{{ config()?.serverName || serverId }}"</strong>? This action cannot be undone. The server and all its data will be permanently removed.
+            </p>
+          </hlm-dialog-header>
+          <hlm-dialog-footer>
+            <button hlmBtn variant="outline" hlmDialogClose>Cancel</button>
+            <button hlmBtn variant="destructive" [disabled]="deleting()" (click)="deleteServer()">
+              {{ deleting() ? 'Deleting...' : 'Delete Server' }}
+            </button>
+          </hlm-dialog-footer>
+        </hlm-dialog-content>
+      </hlm-dialog>
+    </div>
   </div>
-</section>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0">
+        <p hlmCardDescription>Players Online</p>
+        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <div class="flex items-baseline gap-2">
+          <h2 hlmCardTitle class="text-3xl">{{ status()?.player_count || 0 }}</h2>
+          <span class="text-sm text-muted-foreground">/ 20</span>
+        </div>
+      </div>
+    </hlm-card>
+
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0">
+        <p hlmCardDescription>Gamemode</p>
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-2xl capitalize">{{ config()?.mode?.toLowerCase() || 'Unknown' }}</h2>
+      </div>
+    </hlm-card>
+
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0">
+        <p hlmCardDescription>Game Version</p>
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <div class="flex items-baseline gap-2">
+          <h2 hlmCardTitle class="text-2xl">{{ config()?.version || 'N/A' }}</h2>
+          <span class="text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded font-mono">{{ config()?.type || 'VANILLA' }}</span>
+        </div>
+      </div>
+    </hlm-card>
+
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0">
+        <p hlmCardDescription>Memory Limit</p>
+        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-2xl">{{ config()?.memoryLimit || 0 }} MB</h2>
+      </div>
+    </hlm-card>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0 pb-2">
+        <p hlmCardDescription>Difficulty</p>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-lg capitalize">{{ config()?.difficulty?.toLowerCase() || 'N/A' }}</h2>
+      </div>
+    </hlm-card>
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0 pb-2">
+        <p hlmCardDescription>Level</p>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-lg truncate">{{ config()?.level || 'N/A' }}</h2>
+      </div>
+    </hlm-card>
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0 pb-2">
+        <p hlmCardDescription>PvP</p>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-lg">{{ config()?.pvp ? 'Enabled' : 'Disabled' }}</h2>
+      </div>
+    </hlm-card>
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0 pb-2">
+        <p hlmCardDescription>Online Mode</p>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-lg">{{ config()?.onlineMode ? 'On' : 'Off' }}</h2>
+      </div>
+    </hlm-card>
+    <hlm-card>
+      <hlm-card-header class="flex-row items-center justify-between space-y-0 pb-2">
+        <p hlmCardDescription>CPU Cores</p>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <h2 hlmCardTitle class="text-lg">{{ config()?.cpuCoresLimit || 'N/A' }}</h2>
+      </div>
+    </hlm-card>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <hlm-card class="relative">
+      @if (status(); as s) {
+        @if (s.status !== 'running') {
+          <div class="absolute inset-0 bg-card/90 z-10 flex items-center justify-center rounded-lg">
+            <div class="text-center space-y-2">
+              <svg class="w-10 h-10 mx-auto text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 5.25v13.5m-7.5-13.5v13.5"/></svg>
+              <p class="text-muted-foreground/70 text-sm font-medium">Server is stopped</p>
+              <p class="text-muted-foreground/50 text-xs">Start the server to view live metrics</p>
+            </div>
+          </div>
+        }
+      }
+      <hlm-card-header>
+        <div class="flex items-center justify-between">
+          <h3 hlmCardTitle>CPU Usage</h3>
+          <span class="text-blue-400 font-mono text-sm bg-blue-400/10 px-2 py-1 rounded">{{ status()?.cpu_usage_percentage | number:'1.0-1' }}%</span>
+        </div>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <div class="h-64 w-full relative"><canvas #cpuChart></canvas></div>
+      </div>
+    </hlm-card>
+
+    <hlm-card class="relative">
+      @if (status(); as s) {
+        @if (s.status !== 'running') {
+          <div class="absolute inset-0 bg-card/90 z-10 flex items-center justify-center rounded-lg">
+            <div class="text-center space-y-2">
+              <svg class="w-10 h-10 mx-auto text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 5.25v13.5m-7.5-13.5v13.5"/></svg>
+              <p class="text-muted-foreground/70 text-sm font-medium">Server is stopped</p>
+              <p class="text-muted-foreground/50 text-xs">Start the server to view live metrics</p>
+            </div>
+          </div>
+        }
+      }
+      <hlm-card-header>
+        <div class="flex items-center justify-between">
+          <h3 hlmCardTitle>Memory Usage</h3>
+          <span class="text-emerald-400 font-mono text-sm bg-emerald-400/10 px-2 py-1 rounded">
+            {{ status()?.ram_usage_mb | number:'1.0-0' }} MB / {{ status()?.ram_usage_limit_mb || config()?.memoryLimit || 0 }} MB
+          </span>
+        </div>
+      </hlm-card-header>
+      <div hlmCardContent>
+        <div class="h-64 w-full relative"><canvas #ramChart></canvas></div>
+      </div>
+    </hlm-card>
+  </div>
+</div>

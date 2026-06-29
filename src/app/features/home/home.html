@@ -1,1 +1,100 @@
+<div>
+  @if (!isAuthenticated()) {
+    <section class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30"></div>
+      <div aria-hidden="true" class="absolute inset-0 opacity-[0.04]"
+           style="background-image: repeating-linear-gradient(0deg, transparent, transparent 31px, hsl(var(--border)) 31px, hsl(var(--border)) 32px),
+                                      repeating-linear-gradient(90deg, transparent, transparent 31px, hsl(var(--border)) 31px, hsl(var(--border)) 32px);">
+      </div>
+      <div class="relative container mx-auto px-4 py-20 flex flex-col items-center text-center">
+        <img src="/minecraft-grass-block.png" alt="Minecraft" class="w-28 h-28 md:w-36 md:h-36 mb-8" />
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-4">Divum</h1>
+        <p class="text-xl md:text-2xl text-muted-foreground mb-6">Cloud Minecraft server hosting</p>
+        <p class="text-muted-foreground/60 max-w-lg mb-10 leading-relaxed">
+          Deploy and manage Minecraft servers in the cloud with ease.
+          Create custom instances, monitor performance in real-time, and scale on demand.
+        </p>
+        <div class="flex gap-4">
+          <a hlmBtn routerLink="/login" size="lg">Login</a>
+          <a hlmBtn variant="outline" routerLink="/register" size="lg">Register</a>
+        </div>
+      </div>
+    </section>
 
+    <section class="border-t border-border">
+      <div class="container mx-auto px-4 py-20">
+        <h2 class="text-3xl font-bold text-center mb-12">Everything you need to run your servers</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <hlm-card>
+            <hlm-card-header>
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-primary">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+              </div>
+              <h3 hlmCardTitle>Easy Deploy</h3>
+            </hlm-card-header>
+            <div hlmCardContent>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Launch a new Minecraft server instance in seconds with our one-click deploy.
+                Configure memory, world settings, and more through an intuitive interface.
+              </p>
+            </div>
+          </hlm-card>
+
+          <hlm-card>
+            <hlm-card-header>
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-primary">
+                  <line x1="12" y1="20" x2="12" y2="10"/>
+                  <line x1="18" y1="20" x2="18" y2="4"/>
+                  <line x1="6" y1="20" x2="6" y2="16"/>
+                </svg>
+              </div>
+              <h3 hlmCardTitle>Real-time Monitoring</h3>
+            </hlm-card-header>
+            <div hlmCardContent>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Monitor CPU, RAM, and player activity in real-time with live charts.
+                Stay informed with instant status updates and performance metrics.
+              </p>
+            </div>
+          </hlm-card>
+
+          <hlm-card>
+            <hlm-card-header>
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-primary">
+                  <path d="M16 3h5v5M8 3H3v5M3 16v5h5M21 16v5h-5"/>
+                </svg>
+              </div>
+              <h3 hlmCardTitle>Scale on Demand</h3>
+            </hlm-card-header>
+            <div hlmCardContent>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Adjust server resources on the fly as your player base grows.
+                Allocate more RAM or CPU cores without downtime or hassle.
+              </p>
+            </div>
+          </hlm-card>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 text-center">
+      <div class="flex flex-col items-center mb-10">
+        <img src="/minecraft-grass-block.png" alt="Minecraft" class="w-20 h-20 mb-6" />
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-3">Welcome back</h1>
+        <p class="text-lg text-muted-foreground mb-8">Your Minecraft servers are ready</p>
+        <a hlmBtn routerLink="/minecraft-servers" size="lg">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          View Servers
+        </a>
+      </div>
+    </section>
+  }
+</div>
