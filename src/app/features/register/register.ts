@@ -15,7 +15,7 @@ import { HlmCard, HlmCardContent, HlmCardDescription, HlmCardFooter, HlmCardHead
 import { HlmField, HlmFieldError, HlmFieldGroup, HlmFieldLabel } from '@spartan-ng/helm/field';
 import { HlmInput } from '@spartan-ng/helm/input';
 import { Router, RouterLink } from '@angular/router';
-import { RegisterUserState, UserAuthService } from '../user-auth.service';
+import { RegisterUserState, UserAuthService } from '../../core/auth/user-auth.service';
 import { toast } from '@spartan-ng/brain/sonner';
 
 export interface RegisterUserModel {

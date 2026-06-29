@@ -1,0 +1,245 @@
+<hlm-dialog #createServerDialog>
+  <button brnDialogTrigger hlmBtn variant="outline" class="text-2xl py-7 cursor-pointer">
+    <ng-icon name="lucidePlus" class="text-3xl" />Create a server
+  </button>
+
+  <hlm-dialog-content *hlmDialogPortal="let ctx" class="max-w-none! w-[95vw] md:w-200 max-h-[85vh] overflow-y-auto">
+    <hlm-dialog-header>
+      <h3 hlmDialogTitle class="text-2xl">Create a Minecraft Server</h3>
+      <p hlmDialogDescription>Configure all instance settings below.</p>
+    </hlm-dialog-header>
+
+    <form [formRoot]="createMinecraftServerForm" id="form-create-server">
+      <hlm-field-group class="space-y-8 mt-4">
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">General Information</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <hlm-field>
+              <label hlmFieldLabel for="serverName">Server Name</label>
+              <input hlmInput id="serverName" placeholder="My Awesome World" [formField]="createMinecraftServerForm.serverName" />
+              @for (error of createMinecraftServerForm.serverName().errors(); track error) { <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error> }
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="serverAddress">Server Address</label>
+
+              <div class="flex items-center w-full">
+                <input
+                  hlmInput
+                  id="serverAddress"
+                  placeholder="my-server"
+                  [formField]="createMinecraftServerForm.serverAddress"
+                  class="rounded-r-none border-r-0 focus-visible:z-10 flex-1"
+                />
+
+                <span class="inline-flex items-center px-3 rounded-r-md border border-input bg-muted text-muted-foreground text-sm h-9 whitespace-nowrap">
+                      .divum.eu
+                    </span>
+              </div>
+
+              @for (error of createMinecraftServerForm.serverAddress().errors(); track error) {
+                <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error>
+              }
+            </hlm-field>
+          </div>
+
+          <hlm-field>
+            <label hlmFieldLabel for="motd">Message of the Day (MOTD)</label>
+            <input hlmInput id="motd" placeholder="Welcome to the server!" [formField]="createMinecraftServerForm.motd" />
+          </hlm-field>
+        </div>
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">Hardware & Engine</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <hlm-field>
+              <label hlmFieldLabel for="type">Server Type</label>
+              <select id="type" hlmInput [formField]="createMinecraftServerForm.type">
+                <option value="VANILLA">Vanilla</option>
+                <!--                    <option value="PAPER">Paper</option>-->
+                <!--                    <option value="SPIGOT">Spigot</option>-->
+                <!--                    <option value="FORGE">Forge</option>-->
+                <!--                    <option value="FABRIC">Fabric</option>-->
+              </select>
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="version">Minecraft Version</label>
+
+              <select id="version" hlmInput [formField]="createMinecraftServerForm.version">
+                @for (ver of availableVersions(); track ver) {
+                  <option [value]="ver">{{ ver }}</option>
+                }
+              </select>
+
+              @for (error of createMinecraftServerForm.version().errors(); track error) {
+                <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error>
+              }
+            </hlm-field>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <hlm-field>
+              <label hlmFieldLabel>Memory limit (GB)</label>
+              <hlm-slider [min]="1" [max]="8" [step]="0.5" [showTicks]="true" [value]="[_createMinecraftServerModel().memoryLimit]" (valueChange)="onMemoryLimitChange($event)" class="mt-2" />
+              <p class="text-sm text-muted-foreground mt-2">Selected: {{ _createMinecraftServerModel().memoryLimit }} GB</p>
+              @for (error of createMinecraftServerForm.memoryLimit().errors(); track error) { <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error> }
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel>CPU Cores</label>
+              <hlm-slider [min]="0.5" [max]="8" [step]="0.5" [showTicks]="true" [value]="[_createMinecraftServerModel().cpuCoresLimit]" (valueChange)="onCpuCoresLimitChange($event)" class="mt-2" />
+              <p class="text-sm text-muted-foreground mt-2">Selected: {{ _createMinecraftServerModel().cpuCoresLimit }} Cores</p>
+              @for (error of createMinecraftServerForm.cpuCoresLimit().errors(); track error) { <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error> }
+            </hlm-field>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">Gameplay Settings</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <hlm-field>
+              <label hlmFieldLabel for="difficulty">Difficulty</label>
+              <select id="difficulty" hlmInput [formField]="createMinecraftServerForm.difficulty">
+                <option value="PEACEFUL">Peaceful</option>
+                <option value="EASY">Easy</option>
+                <option value="NORMAL">Normal</option>
+                <option value="HARD">Hard</option>
+              </select>
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="mode">Game Mode</label>
+              <select id="mode" hlmInput [formField]="createMinecraftServerForm.mode">
+                <option value="SURVIVAL">Survival</option>
+                <option value="CREATIVE">Creative</option>
+                <option value="ADVENTURE">Adventure</option>
+                <option value="SPECTATOR">Spectator</option>
+              </select>
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="level">World Name (Level)</label>
+              <input hlmInput id="level" placeholder="world" [formField]="createMinecraftServerForm.level" />
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="seed">World Seed (Optional)</label>
+              <input hlmInput id="seed" placeholder="Random" [formField]="createMinecraftServerForm.seed" />
+            </hlm-field>
+          </div>
+
+          <div class="flex flex-wrap gap-8 mt-2">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="pvp" [formField]="createMinecraftServerForm.pvp" class="w-4 h-4 rounded border-input" />
+              <label for="pvp" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Enable PVP</label>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="onlineMode" [formField]="createMinecraftServerForm.onlineMode" class="w-4 h-4 rounded border-input" />
+              <label for="onlineMode" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Online Mode</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">Access Control</h4>
+          <div class="flex flex-wrap gap-8">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="enableWhitelist" [formField]="createMinecraftServerForm.enableWhitelist" class="w-4 h-4 rounded border-input" />
+              <label for="enableWhitelist" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Enable Whitelist</label>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="overrideWhitelist" [formField]="createMinecraftServerForm.overrideWhitelist" class="w-4 h-4 rounded border-input" />
+              <label for="overrideWhitelist" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Override Whitelist</label>
+            </div>
+          </div>
+
+          <hlm-field>
+            <label hlmFieldLabel for="whitelist">Whitelisted Players (Comma separated)</label>
+            <input hlmInput id="whitelist" placeholder="Player1, Player2" [formField]="createMinecraftServerForm.whitelist" />
+          </hlm-field>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <hlm-field class="sm:col-span-2">
+              <label hlmFieldLabel for="ops">Operators (Comma separated)</label>
+              <input hlmInput id="ops" placeholder="admin1, admin2" [formField]="createMinecraftServerForm.ops" />
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="opPermissionLevel">OP Level</label>
+              <select id="opPermissionLevel" hlmInput [formField]="createMinecraftServerForm.opPermissionLevel">
+                <option value="1">1 - Bypass spawn</option>
+                <option value="2">2 - Cmd blocks/cheats</option>
+                <option value="3">3 - Ban/kick</option>
+                <option value="4">4 - Stop server</option>
+              </select>
+            </hlm-field>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">Resource Pack (Optional)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <hlm-field>
+              <label hlmFieldLabel for="resourcePack">Resource Pack URL</label>
+              <input hlmInput id="resourcePack" placeholder="https://..." [formField]="createMinecraftServerForm.resourcePack" />
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="resourcePackSha1">SHA-1 Hash</label>
+              <input hlmInput id="resourcePackSha1" placeholder="Hash string" [formField]="createMinecraftServerForm.resourcePackSha1" />
+            </hlm-field>
+          </div>
+
+          <div class="flex items-center gap-2 mt-2">
+            <input type="checkbox" id="resourcePackEnforce" [formField]="createMinecraftServerForm.resourcePackEnforce" class="w-4 h-4 rounded border-input" />
+            <label for="resourcePackEnforce" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Enforce Resource Pack</label>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold border-b pb-1">RCON Administration</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col justify-center gap-4">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="enableRcon" [formField]="createMinecraftServerForm.enableRcon" class="w-4 h-4 rounded border-input" />
+                <label for="enableRcon" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Enable RCON</label>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="broadcastRconToOps" [formField]="createMinecraftServerForm.broadcastRconToOps" class="w-4 h-4 rounded border-input" />
+                <label for="broadcastRconToOps" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Broadcast to Ops</label>
+              </div>
+            </div>
+
+            <hlm-field>
+              <label hlmFieldLabel for="rconPassword">RCON Password</label>
+              <input hlmInput type="password" id="rconPassword" [formField]="createMinecraftServerForm.rconPassword" />
+              @for (error of createMinecraftServerForm.rconPassword().errors(); track error) { <hlm-field-error [validator]="error.kind">{{ error.message }}</hlm-field-error> }
+            </hlm-field>
+          </div>
+        </div>
+
+        <div class="space-y-4 bg-muted/50 p-4 rounded-md border">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" id="eula" [formField]="createMinecraftServerForm.eula" class="w-5 h-5 rounded border-destructive accent-destructive" />
+            <label for="eula" class="text-base font-semibold text-destructive cursor-pointer">
+              I accept the Minecraft EULA (Required)
+            </label>
+          </div>
+          @for (error of createMinecraftServerForm.eula().errors(); track error) {
+            <hlm-field-error [validator]="error.kind" class="block mt-2">{{ error.message }}</hlm-field-error>
+          }
+        </div>
+
+      </hlm-field-group>
+
+      <hlm-dialog-footer class="mt-8 pt-6 border-t flex justify-end gap-2">
+        <button hlmBtn variant="outline" hlmDialogClose type="button">Cancel</button>
+        <button hlmBtn type="submit" form="form-create-server" [disabled]="isLoading()">Create Server</button>
+      </hlm-dialog-footer>
+    </form>
+  </hlm-dialog-content>
+</hlm-dialog>

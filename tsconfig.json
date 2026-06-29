@@ -22,7 +22,9 @@
       "@spartan-ng/helm/input": ["./libs/ui/input/src/index.ts"],
       "@spartan-ng/helm/alert": ["./libs/ui/alert/src/index.ts"],
       "@spartan-ng/helm/sonner": ["./libs/ui/sonner/src/index.ts"],
-      "@spartan-ng/helm/item": ["./libs/ui/item/src/index.ts"]
+      "@spartan-ng/helm/item": ["./libs/ui/item/src/index.ts"],
+      "@spartan-ng/helm/dialog": ["./libs/ui/dialog/src/index.ts"],
+      "@spartan-ng/helm/slider": ["./libs/ui/slider/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

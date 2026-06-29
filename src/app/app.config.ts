@@ -3,8 +3,14 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { credentialsInterceptor } from './http/credentials.interceptor';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
+import { credentialsInterceptor } from './core/http/credentials.interceptor';
+import { authInterceptor } from './core/http/auth.interceptor';
+import { provideSpartanHlm } from '@spartan-ng/helm/utils';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,7 +18,12 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     provideHttpClient(
-      withInterceptors([credentialsInterceptor])
+      withFetch(),
+      withInterceptors([
+        credentialsInterceptor,
+        authInterceptor,
+      ])
     ),
+    provideSpartanHlm(), // fixes z-index conflict between sonner(toast messages) and dialog windows
   ],
 };

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { MinecraftServers } from './minecraft-servers/minecraft-servers';
-import { Home } from './home/home';
-import { Register } from './register/register';
-import { Login } from './login/login';
+import { MinecraftServers } from './features/minecraft-servers/minecraft-servers';
+import { Home } from './features/home/home';
+import { Register } from './features/register/register';
+import { Login } from './features/login/login';
 
 export const routes: Routes = [
   { path: '', component: Home },
