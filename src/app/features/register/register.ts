@@ -99,7 +99,7 @@ export class Register {
           const model: RegisterUserModel = this._model();
           const state: RegisterUserState = await this._userAuthService.registerUser({
             username: model.username,
-            email: model.email,
+            emailAddress: model.email,
             password: model.password,
           });
 
