@@ -42,7 +42,11 @@ export class UserAuthService {
 
   constructor() {
     if (isPlatformBrowser(this._platformId)) {
-      this._accessToken.set(localStorage.getItem('accessToken'));
+      try {
+        this._accessToken.set(localStorage.getItem('accessToken'));
+      } catch {
+        this._accessToken.set(null);
+      }
     }
   }
 
@@ -73,7 +77,7 @@ export class UserAuthService {
       this.http.post<{ token: string }>(`${environment.apiBaseUrl}/v1/auth/login`, credentials),
     );
 
-    localStorage.setItem('accessToken', res.token);
+    this.updateToken(res.token);
     return {success: true, errorTitle: '', errorDetail: '', statusCode: 200};
     } catch (error) {
       const err = error as HttpErrorResponse;
@@ -94,7 +98,7 @@ export class UserAuthService {
         this.http.post<{token: string}>(`${environment.apiBaseUrl}/v1/auth/register`, credentials)
       );
 
-      localStorage.setItem('accessToken', res.token);
+      this.updateToken(res.token);
       return {success: true, errorTitle: '', errorDetail: '', statusCode: 204};
     } catch (error) {
       const err = error as HttpErrorResponse;
