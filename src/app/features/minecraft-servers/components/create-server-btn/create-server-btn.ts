@@ -9,14 +9,14 @@ import { HlmField, HlmFieldError, HlmFieldGroup, HlmFieldLabel } from '@spartan-
 import { HlmInput } from '@spartan-ng/helm/input';
 import { HlmSlider } from '@spartan-ng/helm/slider';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { MinecraftVersionService } from '../../services/minecraft-version-service';
+import { MinecraftVersionService } from '../../../../core/services/minecraft-version-service';
 import {
   MinecraftServerDifficulty,
   MinecraftServerInstanceConfiguration,
   MinecraftServerMode,
   MinecraftServersService,
   MinecraftServerType,
-} from '../../services/minecraft-servers-service';
+} from '../../../../core/services/minecraft-servers-service';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { toast } from '@spartan-ng/brain/sonner';

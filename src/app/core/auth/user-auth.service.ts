@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { computed, inject, Injectable, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface LoginUserCredentials {
   username: string;
@@ -31,14 +33,45 @@ export interface LoginUserState {
   providedIn: 'root',
 })
 export class UserAuthService {
-  constructor(private http: HttpClient) {}
+  private http: HttpClient = inject(HttpClient);
+  private _platformId = inject(PLATFORM_ID);
+
+  private _accessToken: WritableSignal<string | null> = signal<string | null>(null);
+
+  public readonly isAuthenticated = computed(() => !!this._accessToken());
+
+  constructor() {
+    if (isPlatformBrowser(this._platformId)) {
+      this._accessToken.set(localStorage.getItem('accessToken'));
+    }
+  }
+
+  updateToken(newToken: string) {
+    localStorage.setItem('accessToken', newToken);
+    this._accessToken.set(newToken);
+  }
+
+  async refreshAccessToken(): Promise<string> {
+    try {
+      const res = await lastValueFrom(
+        this.http.post<{token: string}>(`${environment.apiBaseUrl}/v1/auth/refresh`, {})
+      );
+
+      this.updateToken(res.token);
+      return res.token;
+    } catch (error) {
+      this.logout();
+      throw error;
+    }
+  }
 
   public async loginUser(
     credentials: LoginUserCredentials,
   ): Promise<LoginUserState> {
     try {
     const res = await lastValueFrom(
-      this.http.post<{token: string}>('http://localhost:8080/api/v1/auth/login', credentials));
+      this.http.post<{ token: string }>(`${environment.apiBaseUrl}/v1/auth/login`, credentials),
+    );
 
     localStorage.setItem('accessToken', res.token);
     return {success: true, errorTitle: '', errorDetail: '', statusCode: 200};
@@ -58,13 +91,12 @@ export class UserAuthService {
   ): Promise<RegisterUserState> {
     try {
       const res = await lastValueFrom(
-        this.http.post<{token: string}>('http://localhost:8080/api/v1/auth/register', credentials)
+        this.http.post<{token: string}>(`${environment.apiBaseUrl}/v1/auth/register`, credentials)
       );
 
       localStorage.setItem('accessToken', res.token);
       return {success: true, errorTitle: '', errorDetail: '', statusCode: 204};
     } catch (error) {
-      console.log(error);
       const err = error as HttpErrorResponse;
       return {
         success: false,
@@ -73,5 +105,10 @@ export class UserAuthService {
         statusCode: err.status,
       }
     }
+  }
+
+  logout() {
+    localStorage.removeItem('accessToken');
+    this._accessToken.set(null);
   }
 }
