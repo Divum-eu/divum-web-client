@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { BrnDialogTrigger } from '@spartan-ng/brain/dialog';
 import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { MinecraftServersService, MinecraftServerInstanceResponse } from '../../core/services/minecraft-servers-service';
@@ -10,16 +10,29 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { CreateServerBtn } from '../minecraft-servers/components/create-server-btn/create-server-btn';
 import { toast } from '@spartan-ng/brain/sonner';
 import { finalize } from 'rxjs';
+import { EditServerBtn } from '../minecraft-servers/components/edit-server-btn/edit-server-btn';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-minecraft-server-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, HlmCardImports, HlmAlertImports, HlmButtonImports, HlmDialogImports, BrnDialogTrigger, CreateServerBtn],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HlmCardImports,
+    HlmAlertImports,
+    HlmButtonImports,
+    HlmDialogImports,
+    BrnDialogTrigger,
+    CreateServerBtn,
+    EditServerBtn,
+  ],
   templateUrl: './minecraft-server-list.html',
 })
 export class MinecraftServerList implements OnInit {
   private _mcService = inject(MinecraftServersService);
   private _platformId = inject(PLATFORM_ID);
+  private _router: Router = inject(Router);
 
   servers = signal<MinecraftServerInstanceResponse[]>([]);
   loading = signal(false);
@@ -27,11 +40,7 @@ export class MinecraftServerList implements OnInit {
   deleting = signal(false);
   private _loadingTimer: ReturnType<typeof setTimeout> | null = null;
 
-  ngOnInit(): void {
-    if (!isPlatformBrowser(this._platformId)) {
-      return;
-    }
-
+  loadServers(): void {
     this._loadingTimer = setTimeout(() => this.loading.set(true), 500);
 
     this._mcService.getAllServers().subscribe({
@@ -39,11 +48,28 @@ export class MinecraftServerList implements OnInit {
         this.servers.set(data);
         this._clearLoading();
       },
-      error: (err) => {
-        this.error.set(err.status === 401 ? 'Please log in to view your servers.' : 'Failed to load servers.');
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          this._router.navigate(['/login']);
+          this._clearLoading();
+          return;
+        }
+
+        this.error.set(
+          "Failed to load servers.",
+        )
+
         this._clearLoading();
-      },
-    });
+      }
+    })
+  }
+
+  ngOnInit(): void {
+    if (!isPlatformBrowser(this._platformId)) {
+      return;
+    }
+
+    this.loadServers();
   }
 
   private _clearLoading() {
@@ -56,7 +82,8 @@ export class MinecraftServerList implements OnInit {
 
   confirmDelete(server: MinecraftServerInstanceResponse) {
     this.deleting.set(true);
-    this._mcService.deleteServer(server.id)
+    this._mcService
+      .deleteServer(server.id)
       .pipe(finalize(() => this.deleting.set(false)))
       .subscribe({
         complete: () => {

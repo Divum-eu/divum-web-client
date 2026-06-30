@@ -10,6 +10,7 @@ const refreshSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next: HttpHandlerFn) => {
   const platformId = inject(PLATFORM_ID);
+  const authService = inject(UserAuthService);
 
   if (!isPlatformBrowser(platformId)) {
     return next(req);
@@ -52,8 +53,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next: HttpHandlerFn) => 
 
       isRefreshing = true;
       refreshSubject.next(null);
-
-      const authService = inject(UserAuthService);
 
       return from(authService.refreshAccessToken()).pipe(
         switchMap((newToken) => {
