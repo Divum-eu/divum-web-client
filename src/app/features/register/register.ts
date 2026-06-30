@@ -75,6 +75,8 @@ export class Register {
         message:
           'Password must contain at least one uppercase letter, one lowercase letter, one digit and one special character.',
       });
+      minLength(schemaPath.password, 12, {message: "Password must be at least 12 characters long"});
+      maxLength(schemaPath.password, 72, {message: "Password must be max 72 characters long"})
 
       required(schemaPath.passwordConfirm, { message: 'Password confirmation is required' });
       validate(schemaPath.passwordConfirm, (ctx) => {
@@ -99,7 +101,7 @@ export class Register {
           const model: RegisterUserModel = this._model();
           const state: RegisterUserState = await this._userAuthService.registerUser({
             username: model.username,
-            email: model.email,
+            emailAddress: model.email,
             password: model.password,
           });
 
